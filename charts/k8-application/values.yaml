@@ -1,0 +1,75 @@
+replicaCount: 1
+revisionHistoryLimit: 10
+
+autoscaling:
+  enabled: true
+  cpu:
+    enabled: true
+    percentage: 60
+  memory:
+    enabled: false
+    percentage: 60
+  min_replicas: 1
+  max_replicas: 2
+rollingUpdate:
+  enabled: false
+  maxUnavailable: 25%
+  maxSurge: 1
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+instanceOverride: ""
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+podSecurityContext:
+podAnnotations:
+podLabels:
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+volumesFreeForm: false
+volumes:
+podDisruptionBudget:
+  maxUnavailable: "10%"
+
+loadbalancers:
+terminationGracePeriodSeconds: 30
+deployment:
+  enabled: true
+  alwaysRestartPodsOnDeployment: true
+
+canary:
+  enabled: false
+  trafficControl:
+  canaries:
+
+ingress_override:
+  enabled: false
+daemonset:
+  enabled: false
+
+configmap:
+  enabled: false
+  configs:
+initContainers:
+containers:
+  myservice:
+    image:
+      name: someimage
+      tag: v10
+      pullPolicy: IfNotPresent
+nodeSelector: {}
+tolerations: []
+affinity: {}
+customLabels:
+argoRollouts:
+  enabled: false
+statefulSet:
+  enabled: false
+  podManagementPolicy: OrderedReady
+  volumeClaimTemplates: []

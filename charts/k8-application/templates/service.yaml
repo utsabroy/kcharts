@@ -1,0 +1,20 @@
+{{- if .Values.service.enabled -}}
+{{- $fullName := include "k8-application.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "k8-application.fullname" . }}
+  labels:
+    {{- include "k8-application.labels" . | nindent 4 }}
+    {{- include "k8-application.customLabels" . | indent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    {{- range .Values.service.ports }}
+    - port: {{ . }}
+      protocol: TCP
+      name: http-{{ $fullName }}-p{{ . }}
+    {{- end }}
+  selector:
+    {{- include "k8-application.selectorLabels" . | nindent 4 }}
+{{- end -}}

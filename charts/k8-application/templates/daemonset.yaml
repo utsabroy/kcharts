@@ -1,0 +1,44 @@
+{{- if .Values.daemonset.enabled -}}
+
+{{- if .Values.deployment.enabled }}
+{{- fail "Cannot enable a daemonset and deployment at the same time" }}
+{{- else if not (or (.Values.initContainers) (.Values.containers)) }}
+{{- fail "Cannot enable a daemonset, no containers or initContainers are specified" }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "k8-application.fullname" . }}
+  labels:
+    {{- include "k8-application.labels" . | nindent 4 }}
+    {{- include "k8-application.customLabels" . | indent 4 }}
+spec:
+  {{- if .Values.rollingUpdate.enabled }}
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+  {{- end }}
+  minReadySeconds: {{ default 0 .Values.minReadySeconds }}  
+  selector:
+    matchLabels:
+      {{- include "k8-application.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "k8-application.selectorLabels" . | nindent 8 }}
+        {{- if (not .Values.testing) }}
+        application/createdAt: {{ now | unixEpoch | quote }}
+        {{- end }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "k8-application.podSpec" (dict "root" $ "initContainers" .Values.initContainers "containers" .Values.containers) | nindent 6 }}
+{{- end }}

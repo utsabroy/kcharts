@@ -1,0 +1,15 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "k8-application.fullname" . }}
+  labels:
+    {{- include "k8-application.labels" . | nindent 4 }}
+    {{- include "k8-application.customLabels" . | indent 4 }}
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- end  }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "k8-application.selectorLabels" . | nindent 6 }}

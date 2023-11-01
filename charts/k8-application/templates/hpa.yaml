@@ -1,0 +1,44 @@
+{{ if and (.Values.autoscaling.enabled) }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "k8-application.fullname" . }}
+  labels:
+    {{- include "k8-application.labels" $ | nindent 4 }}
+    {{- include "k8-application.customLabels" $ | indent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "k8-application.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.min_replicas }}
+  maxReplicas: {{ .Values.autoscaling.max_replicas }}
+  metrics:
+  {{- if and (.Values.autoscaling.cpu.enabled) }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.cpu.percentage }}
+  {{- else if  .Values.autoscaling.cpu_percentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.cpu_percentage }}
+  {{- end -}}
+  {{- if .Values.autoscaling.memory.enabled }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.memory.percentage }}
+  {{- end }}
+  {{- if .Values.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{ end }}

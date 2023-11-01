@@ -1,0 +1,52 @@
+{{- if .Values.statefulSet.enabled }}
+{{- if .Values.deployment.enabled }}
+{{- fail "Cannot enable a StatefulSet with deployment enabled" }}
+{{- else if .Values.daemonset.enabled }}
+{{- fail "Cannot enable a StatefulSet with daemonset enabled" }}
+{{- else if not (or (.Values.initContainers) (.Values.containers)) }}
+{{- fail "Cannot enable a statefulSet, no containers or initContainers are specified" }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "k8-application.fullname" . }}
+  labels:
+    {{- include "k8-application.labels" . | nindent 4 }}
+    {{- include "k8-application.customLabels" . | indent 4 }}
+spec:
+  {{- if and (not .Values.autoscaling.enabled) }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  serviceName: {{ default (include "k8-application.fullname" .) .Values.statefulSet.serviceName }}
+  podManagementPolicy: {{ .Values.statefulSet.podManagementPolicy }}
+  {{- if .Values.rollingUpdate.enabled }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+  {{- end }}
+  minReadySeconds: {{ default 0 .Values.minReadySeconds }}
+  selector:
+    matchLabels:
+      {{- include "k8-application.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "k8-application.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "k8-application.podSpec" (dict "root" $ "initContainers" .Values.initContainers "containers" .Values.containers) | nindent 6 }}
+  {{- with .Values.statefulSet.volumeClaimTemplates }}
+  volumeClaimTemplates:
+  {{- toYaml . | nindent 4 -}}
+  {{- end -}}
+{{- end -}}

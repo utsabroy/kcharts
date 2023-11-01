@@ -1,0 +1,5 @@
+apiVersion: v2
+name: k8-application
+description: A Helm chart for Kubernetes application
+type: application
+version: 1.0.0
