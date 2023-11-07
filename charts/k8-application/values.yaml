@@ -48,7 +48,7 @@ canary:
   trafficControl:
   canaries:
 
-ingress_override:
+awsIngress:
   enabled: false
 daemonset:
   enabled: false

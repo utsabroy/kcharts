@@ -1,4 +1,4 @@
-{{- if not .Values.ingress_override.enabled }}
+{{- if not .Values.awsIngress.enabled }}
 {{- $fullName := include "k8-application.fullname" . -}}
 {{- range $key, $lb := .Values.loadbalancers }}
 {{- $lbPortName := include "k8-application.portName" $lb }}
