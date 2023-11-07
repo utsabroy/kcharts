@@ -5,10 +5,10 @@ autoscaling:
   enabled: true
   cpu:
     enabled: true
-    percentage: 60
+    percentage: 70
   memory:
     enabled: false
-    percentage: 60
+    percentage: 70
   min_replicas: 1
   max_replicas: 2
 rollingUpdate:
@@ -58,11 +58,11 @@ configmap:
   configs:
 initContainers:
 containers:
-  myservice:
-    image:
-      name: someimage
-      tag: v10
-      pullPolicy: IfNotPresent
+  # myservice:
+  #   image:
+  #     name: someimage
+  #     tag: v10
+  #     pullPolicy: IfNotPresent
 nodeSelector: {}
 tolerations: []
 affinity: {}
