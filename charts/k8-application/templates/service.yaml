@@ -19,7 +19,7 @@ spec:
     - port: {{ .port }}
       protocol: {{ .protocol | default "TCP" }}
       targetPort: {{ .targetPort | default .port }}
-      name: {{ .protocol | default "TCP" }}-{{ $fullName }}-p{{ .port }}-t{{ .targetPort | default .port }}
+      name: n{{ $fullName }}-p{{ .port }}-t{{ .targetPort | default .port }}
     {{- end }}
   selector:
     {{- include "k8-application.selectorLabels" . | nindent 4 }}
