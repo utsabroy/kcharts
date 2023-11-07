@@ -1,19 +1,31 @@
 {{- if .Values.service.enabled -}}
 {{- $fullName := include "k8-application.fullname" . -}}
+{{- $srv := .Values.service}}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "k8-application.fullname" . }}
+  {{- with $srv.metadata.annotations}}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end}}
   labels:
     {{- include "k8-application.labels" . | nindent 4 }}
     {{- include "k8-application.customLabels" . | indent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ $srv.type }}
   ports:
     {{- range .Values.service.ports }}
     - port: {{ . }}
       protocol: TCP
+      targetPort: {{ .targetPort | default .port }}
       name: http-{{ $fullName }}-p{{ . }}
+    {{- end }}
+    {{- range $srv.nlb_ports }}
+    - port: {{ .port }}
+      protocol: {{ .protocol | default "TCP" }}
+      targetPort: {{ .targetPort | default .port }}
+      name: http-{{ $fullName }}-p{{ .port }}-t{{ .targetPort | default .port }}
     {{- end }}
   selector:
     {{- include "k8-application.selectorLabels" . | nindent 4 }}

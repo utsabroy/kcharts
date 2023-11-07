@@ -15,7 +15,7 @@ urlFragment: kcharts
 Add the kcharts chart repository.
 
 ```
-helm repo add azure-samples https://utsabroy.github.io/kcharts/
+helm repo add kcharts https://utsabroy.github.io/kcharts/
 ```
 
 ## Chart source
