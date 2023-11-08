@@ -1,119 +1,21 @@
-{{- if not .Values.awsIngress.enabled }}
+{{- if .Values.ingress.enabled }}
 {{- $fullName := include "k8-application.fullname" . -}}
-{{- range $key, $lb := .Values.loadbalancers }}
-{{- $lbPortName := include "k8-application.portName" $lb }}
-{{- $lbPortNumber := include "k8-application.portNumber" $lb }}
+{{- range $key, $lb := .Values.ingress.loadbalancers }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-{{ $key }}
+  labels:
+    {{- include "k8-application.labels" $ | nindent 4 }}
+    {{- include "k8-application.customLabels" $ | indent 4 }}
   {{- with $lb.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  labels:
-    {{- include "k8-application.labels" $ | nindent 4 }}
-    {{- include "k8-application.customLabels" $ | indent 4 }}
 spec:
-  rules:
-    {{- $commonPaths := .paths }}
-    {{- range .hosts }}
-    -
-      {{- if .host }}
-      host: {{ quote .host }}
-      {{- end }}
-      http:
-        paths:
-        {{- if $commonPaths }}
-          {{- range $commonPaths }}
-          - path: {{ .path }}
-            {{- if .pathType }}
-            pathType: {{ .pathType }}
-            {{- else }}
-            pathType: ImplementationSpecific
-            {{- end }}
-            backend:
-              service:
-                name: {{ default $fullName .annotation }}
-                port:
-                  {{- if .port }}
-                  {{- if include "k8-application.portName" . }}
-                  name: {{ include "k8-application.portName" . }}
-                  {{- else }}
-                  number: {{ include "k8-application.portNumber" . }}
-                  {{- end }}
-                  {{- else }}
-                  {{- if $lbPortName }}
-                  name: {{ $lbPortName }}
-                  {{- else }}
-                  number: {{ $lbPortNumber }}
-                  {{- end }}
-                  {{- end }}
-          {{- end }}
-        {{- else if .paths }}
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- if .pathType }}
-            pathType: {{ .pathType }}
-            {{- else }}
-            pathType: ImplementationSpecific
-            {{- end }}
-            backend:
-              service:
-                name: {{ default $fullName .annotation }}
-                port:
-                  {{- if .port }}
-                  {{- if include "k8-application.portName" . }}
-                  name: {{ include "k8-application.portName" . }}
-                  {{- else }}
-                  number: {{ include "k8-application.portNumber" . }}
-                  {{- end }}
-                  {{- else }}
-                  {{- if $lbPortName }}
-                  name: {{ $lbPortName }}
-                  {{- else }}
-                  number: {{ $lbPortNumber }}
-                  {{- end }}
-                  {{- end }}
-          {{- end }}
-        {{- else if .path }}
-          - path: {{ .path }}
-            {{- if .pathType }}
-            pathType: {{ .pathType }}
-            {{- else }}
-            pathType: ImplementationSpecific
-            {{- end }}
-            backend:
-              service:
-                name: {{ default $fullName .annotation }}
-                port:
-                  {{- if .port }}
-                  {{- if include "k8-application.portName" . }}
-                  name: {{ include "k8-application.portName" . }}
-                  {{- else }}
-                  number: {{ include "k8-application.portNumber" . }}
-                  {{- end }}
-                  {{- else }}
-                  {{- if $lbPortName }}
-                  name: {{ $lbPortName }}
-                  {{- else }}
-                  number: {{ $lbPortNumber }}
-                  {{- end }}
-                  {{- end }}
-        {{- else }}
-          - path: /*
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ default $fullName .annotation }}
-                port:
-                  {{- if $lbPortName }}
-                  name: {{ $lbPortName }}
-                  {{- else }}
-                  number: {{ $lbPortNumber }}
-                  {{- end }}
-        {{- end }}
-    {{- end }}
+  {{- with $lb.spec }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 ---
 {{- end }}
 {{- end }}

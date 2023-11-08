@@ -29,6 +29,8 @@ podSecurityContext:
 podAnnotations:
 podLabels:
 service:
+  metadata:
+    annotations: {}
   enabled: true
   type: ClusterIP
   ports:
@@ -48,7 +50,7 @@ canary:
   trafficControl:
   canaries:
 
-awsIngress:
+ingress:
   enabled: false
 daemonset:
   enabled: false
@@ -56,13 +58,9 @@ daemonset:
 configmap:
   enabled: false
   configs:
-initContainers:
-containers:
-  # myservice:
-  #   image:
-  #     name: someimage
-  #     tag: v10
-  #     pullPolicy: IfNotPresent
+initContainers: {}
+containers: {}
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
